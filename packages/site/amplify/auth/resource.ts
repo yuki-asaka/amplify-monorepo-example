@@ -1,5 +1,7 @@
 import {defineAuth, secret} from '@aws-amplify/backend';
 
+console.log('OIDC_ISSUER_URL', process.env.OIDC_ISSUER_URL);
+
 export const auth = defineAuth({
   loginWith: {
     email: true, externalProviders: {

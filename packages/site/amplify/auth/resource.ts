@@ -6,6 +6,7 @@ export const auth = defineAuth({
       oidc: [{
         clientId: secret('OidcClientId'),
         clientSecret: secret('OidcClientSecret'),
+        name: process.env.OIDC_NAME!,
         issuerUrl: process.env.OIDC_ISSUER_URL!,
         endpoints: {
           authorization: process.env.OIDC_AUTHORIZATION!,

@@ -6,6 +6,7 @@ applications:
         build:
           echo "nothing to do"
       artifacts:
+        base-directory: .
         files:
           - "**/*"
     backend:

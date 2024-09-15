@@ -1,6 +1,10 @@
 version: 1
 applications:
   - appRoot: packages/site
+    frontend:
+      phases:
+        build:
+          echo "nothing to do"
     backend:
       phases:
         build:

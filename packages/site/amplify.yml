@@ -1,6 +1,7 @@
 version: 1
 applications:
-  - appRoot: /
+  - appRoot: frontend
+    frontend:
     backend:
       phases:
         build:

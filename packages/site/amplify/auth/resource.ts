@@ -17,8 +17,8 @@ export const auth = defineAuth({
           jwksUri: process.env.OIDC_JWKS_URI!,
         }
       }],
-      callbackUrls: ['https://example.com'],
-      logoutUrls: ['https://example.com']
+      callbackUrls: ['http://localhost:3000'],
+      logoutUrls: ['http://localhost:3000']
     }
   }
 });

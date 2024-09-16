@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "scripts": {
+    "dev": "hugo server",
+    "build": "hugo"
+  },
   "devDependencies": {
     "@aws-amplify/backend": "^1.2.1",
     "@aws-amplify/backend-cli": "^1.2.6",

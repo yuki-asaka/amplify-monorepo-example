@@ -3,6 +3,7 @@
     "typeRoots": ["./node_modules/@types", "./typings"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
   },
   "exclude": ["node_modules"],
 }

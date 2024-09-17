@@ -64,6 +64,7 @@ export class SiteCdn extends Construct {
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
             runtime: lambda.Runtime.NODEJS_20_X,
+            entry: './lib/constructs/cdn.auth-handler.ts',
             bundling: {
                 externalModules: ['@aws-sdk/*'],
             },

@@ -9,7 +9,6 @@ import {
     aws_wafv2 as wafv2,
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
-import * as path from "node:path";
 
 
 enum HttpStatus {
@@ -65,7 +64,7 @@ export class SiteCdn extends Construct {
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: path.join(__dirname, './cdn.auth-handler.ts'),
+            entry: './cdn.auth-handler.ts',
         });
         this._lambdaAtEdge.applyRemovalPolicy(RemovalPolicy.DESTROY);
 

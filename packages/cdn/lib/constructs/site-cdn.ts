@@ -58,13 +58,13 @@ export class SiteCdn extends Construct {
 
     withLambdaProtection(): SiteCdn {
         const jsonIndentSpaces = 4;
-        fs.writeFileSync('./cdn.auth-handler.config.json', JSON.stringify({
+        fs.writeFileSync('./lib/constructs/cdn.auth-handler.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './cdn.auth-handler.ts',
+            entry: './lib/constructs/cdn.auth-handler.ts',
         });
         this._lambdaAtEdge.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
@@ -114,23 +114,23 @@ export class SiteCdn extends Construct {
     withGithubWrapper(
     ): SiteCdn {
         const jsonIndentSpaces = 4;
-        fs.writeFileSync('./cdn.oauth-access-token.config.json', JSON.stringify({
+        fs.writeFileSync('./lib/constructs/cdn.oauth-access-token.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         const accessTokenLambda = new lambdaNode.NodejsFunction(this, 'OauthAccessToken', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './cdn.oauth-access-token.ts',
+            entry: './lib/constructs/cdn.oauth-access-token.ts',
         });
         accessTokenLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
-        fs.writeFileSync('./cdn.oauth-user.config.json', JSON.stringify({
+        fs.writeFileSync('./lib/constructs/cdn.oauth-user.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         const userLambda = new lambdaNode.NodejsFunction(this, 'OauthUser', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './cdn.oauth-user.ts',
+            entry: './lib/constructs/cdn.oauth-user.ts',
         });
         userLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 

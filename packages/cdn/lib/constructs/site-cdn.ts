@@ -64,7 +64,9 @@ export class SiteCdn extends Construct {
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './lib/constructs/cdn.auth-handler.ts',
+            bundling: {
+                externalModules: ['@aws-sdk/*'],
+            },
         });
         this._lambdaAtEdge.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
@@ -121,6 +123,9 @@ export class SiteCdn extends Construct {
         const accessTokenLambda = new lambdaNode.NodejsFunction(this, 'OauthAccessToken', {
             runtime: lambda.Runtime.NODEJS_20_X,
             entry: './lib/constructs/cdn.oauth-access-token.ts',
+            bundling: {
+                externalModules: ['@aws-sdk/*'],
+            },
         });
         accessTokenLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
@@ -131,6 +136,9 @@ export class SiteCdn extends Construct {
         const userLambda = new lambdaNode.NodejsFunction(this, 'OauthUser', {
             runtime: lambda.Runtime.NODEJS_20_X,
             entry: './lib/constructs/cdn.oauth-user.ts',
+            bundling: {
+                externalModules: ['@aws-sdk/*'],
+            },
         });
         userLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 

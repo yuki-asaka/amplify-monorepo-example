@@ -221,11 +221,11 @@ export class SiteCdn extends Construct {
         });
 
         // https://github.com/aws/aws-cdk/issues/25343
-        // this._certificate = new acm.DnsValidatedCertificate(this, 'Certificate', {
-        //     domainName: `${domainName}.${hostedZoneName}`,
-        //     hostedZone: this._hostedZone,
-        //     region: 'us-east-1',
-        // });
+        this._certificate = new acm.DnsValidatedCertificate(this, 'Certificate', {
+            domainName: `${domainName}.${hostedZoneName}`,
+            hostedZone: this._hostedZone,
+            region: 'us-east-1',
+        });
         return this;
     }
 }

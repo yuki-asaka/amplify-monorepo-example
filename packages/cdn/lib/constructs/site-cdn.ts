@@ -19,8 +19,8 @@ export class SiteCdn extends Construct {
     private readonly _appName: string;
     private readonly _accessLogBucket: s3.IBucket;
     private readonly _frontendS3Bucket: s3.IBucket;
-    private _lambdaAtEdge: lambdaNode.NodejsFunction;
-    private _distribution: cloudfront.Distribution;
+    private _lambdaAtEdge: lambdaNode.NodejsFunction | undefined;
+    private _distribution: cloudfront.Distribution | undefined;
     private _wafACL: wafv2.CfnWebACL | undefined;
 
     constructor(scope: Construct, id: string, props: {
@@ -58,13 +58,13 @@ export class SiteCdn extends Construct {
 
     withLambdaProtection(): SiteCdn {
         const jsonIndentSpaces = 4;
-        fs.writeFileSync('./lib/constructs/cdn.auth-handler.config.json', JSON.stringify({
+        fs.writeFileSync('./lib/server/site-cdn/auth-handler.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './lib/constructs/cdn.auth-handler.ts',
+            entry: './lib/server/site-cdn/auth-handler.ts',
             bundling: {
                 externalModules: ['@aws-sdk/*'],
             },
@@ -117,26 +117,26 @@ export class SiteCdn extends Construct {
     withGithubWrapper(
     ): SiteCdn {
         const jsonIndentSpaces = 4;
-        fs.writeFileSync('./lib/constructs/cdn.oauth-access-token.config.json', JSON.stringify({
+        fs.writeFileSync('./lib/server/site-cdn/oauth-access-token.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         const accessTokenLambda = new lambdaNode.NodejsFunction(this, 'OauthAccessToken', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './lib/constructs/cdn.oauth-access-token.ts',
+            entry: './lib/server/site-cdn/oauth-access-token.ts',
             bundling: {
                 externalModules: ['@aws-sdk/*'],
             },
         });
         accessTokenLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
-        fs.writeFileSync('./lib/constructs/cdn.oauth-user.config.json', JSON.stringify({
+        fs.writeFileSync('./lib/server/site-cdn/oauth-user.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         const userLambda = new lambdaNode.NodejsFunction(this, 'OauthUser', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './lib/constructs/cdn.oauth-user.ts',
+            entry: './lib/server/site-cdn/oauth-user.ts',
             bundling: {
                 externalModules: ['@aws-sdk/*'],
             },

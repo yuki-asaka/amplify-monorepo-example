@@ -3,7 +3,6 @@ import {secureHeaders} from "hono/secure-headers";
 import {logger} from "hono/logger";
 import {handle} from "hono/lambda-edge";
 import {json} from "node:stream/consumers";
-import type {StatusCode} from "hono/dist/types/utils/http-status";
 
 const app = new Hono();
 
@@ -32,12 +31,10 @@ app.post("/oauth/access_token", async (c) => {
     // logging response body
     // console.log(res);
 
-    return c.json(
-        await response.json(),
-        response.status as StatusCode,
-        // StatusCode.
-        // response.headers
-    )
+    return c.json({
+        body: await response.json(),
+        status: response.status,
+    })
 });
 
 export const handler = handle(app);

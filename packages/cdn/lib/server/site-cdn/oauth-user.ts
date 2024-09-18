@@ -2,7 +2,6 @@ import {Hono} from "hono";
 import {secureHeaders} from "hono/secure-headers";
 import {logger} from "hono/logger";
 import {handle} from "hono/lambda-edge";
-import {StatusCode} from "hono/dist/types/utils/http-status";
 
 const app = new Hono();
 
@@ -30,13 +29,13 @@ app.get("/oauth/user", async (c) => {
     // dump the user object to the console
     console.log(obj);
 
-    return c.json(
-        {
+    return c.json({
+        body: {
             ...obj,
             sub: obj.id.toString(),
         },
-        response.status as StatusCode
-    );
+        status: response.status
+    });
 });
 
 export const handler = handle(app);

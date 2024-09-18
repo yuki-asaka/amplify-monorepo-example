@@ -1,7 +1,7 @@
 import { CloudFrontRequestEvent, CloudFrontRequestHandler } from 'aws-lambda';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
-import config from './cdn.auth-handler.config.json';
-import { AsyncHandler } from '../helpers/async-handler';
+import config from './auth-handler.config.json';
+import { AsyncHandler } from './helpers/async-handler';
 
 const defaultRegion = 'us-east-1';
 const ssmParamNames = {

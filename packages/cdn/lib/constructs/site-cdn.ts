@@ -6,6 +6,9 @@ import {
     aws_lambda_nodejs as lambdaNode,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
+    aws_certificatemanager as acm,
+    aws_route53 as route53,
+    aws_route53_targets as targets,
     aws_wafv2 as wafv2,
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
@@ -22,6 +25,9 @@ export class SiteCdn extends Construct {
     private _lambdaAtEdge: lambdaNode.NodejsFunction | undefined;
     private _distribution: cloudfront.Distribution | undefined;
     private _wafACL: wafv2.CfnWebACL | undefined;
+    private _domainName: string | undefined;
+    private _hostedZone: route53.IHostedZone | undefined;
+    private _certificate: acm.Certificate | undefined;
 
     constructor(scope: Construct, id: string, props: {
         appName: string,
@@ -81,7 +87,6 @@ export class SiteCdn extends Construct {
     }
 
     withCDN(): SiteCdn {
-        /* CDN */
         const defaultErrorResponseTTLSeconds = 10;
         this._distribution = new cloudfront.Distribution(this, 'FrontendDistribution', {
             defaultBehavior: {
@@ -115,7 +120,16 @@ export class SiteCdn extends Construct {
             minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
             logBucket: this._accessLogBucket,
             logFilePrefix: 'frontend-distribution/',
+            certificate: this._certificate,
         });
+
+        if (this._domainName && this._hostedZone) {
+            new route53.ARecord(this, 'AliasRecord', {
+                zone: this._hostedZone,
+                target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this._distribution)),
+                recordName: this._domainName,
+            });
+        }
 
         return this;
     }
@@ -187,6 +201,22 @@ export class SiteCdn extends Construct {
             }
         );
 
+        return this;
+    }
+
+    withCustomDomain(hostedZoneId: string, domainName: string): SiteCdn {
+        if (!hostedZoneId) {
+            throw new Error('HostedZoneId is required');
+        }
+        if (!domainName) {
+            throw new Error('DomainName is required');
+        }
+        this._domainName = domainName;
+        this._hostedZone = route53.HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId);
+        this._certificate = new acm.Certificate(this, 'Certificate', {
+            domainName: `${domainName}.${this._hostedZone.zoneName}`, // FQDN
+            validation: acm.CertificateValidation.fromDns(this._hostedZone),
+        });
         return this;
     }
 }

@@ -19,15 +19,13 @@ const appName = process.env.APP_NAME;
 const userPool = backend.auth.resources.userPool as cognito.UserPool;
 const userPoolClient = backend.auth.resources.userPoolClient as cognito.UserPoolClient;
 
-userPool.addDomain('CognitoDomain', {cognitoDomain: {domainPrefix: appName}});
-
 const stack = backend.createStack('SiteParameters');
 new ssm.StringParameter(stack, 'user-pool-id', {
   parameterName: `/${appName}/user-pool-id`, stringValue: userPool.userPoolId,
 });
 
 new ssm.StringParameter(stack, 'user-pool-domain-prefix', {
-  parameterName: `/${appName}/user-pool-domain`, stringValue: appName,
+  parameterName: `/${appName}/user-pool-domain`, stringValue: userPool.userPoolProviderUrl,
 });
 
 const cognitoClientParamName = `/${appName}/user-pool-client-id`;

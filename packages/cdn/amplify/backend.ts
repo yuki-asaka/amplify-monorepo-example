@@ -10,12 +10,13 @@ const infraStack = backend.createStack('SiteInfra');
 
 // domain
 const hostedZoneId = process.env.HOSTED_ZONE_ID;
+const hostedZoneName = process.env.HOSTED_ZONE_NAME;
 const domainName = process.env.DOMAIN_NAME;
 
 new constructs.SiteCdn(infraStack, 'SiteCdn', {
     appName: 'site-cdn'
 })
-.withCustomDomain(hostedZoneId!, domainName!)
+.withCustomDomain(hostedZoneId!, hostedZoneName!, domainName!)
 .withLambdaProtection()
 .withCDN()
 .withGithubWrapper()

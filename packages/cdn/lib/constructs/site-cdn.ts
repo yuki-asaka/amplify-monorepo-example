@@ -204,17 +204,23 @@ export class SiteCdn extends Construct {
         return this;
     }
 
-    withCustomDomain(hostedZoneId: string, domainName: string): SiteCdn {
+    withCustomDomain(hostedZoneId: string, hostedZoneName: string, domainName: string): SiteCdn {
         if (!hostedZoneId) {
             throw new Error('HostedZoneId is required');
+        }
+        if (!hostedZoneName) {
+            throw new Error('HostedZoneName is required');
         }
         if (!domainName) {
             throw new Error('DomainName is required');
         }
         this._domainName = domainName;
-        this._hostedZone = route53.HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId);
+        this._hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+            hostedZoneId,
+            zoneName: hostedZoneName,
+        });
         this._certificate = new acm.Certificate(this, 'Certificate', {
-            domainName: `${domainName}.${this._hostedZone.zoneName}`, // FQDN
+            domainName: `${domainName}.${hostedZoneName}`, // FQDN
             validation: acm.CertificateValidation.fromDns(this._hostedZone),
         });
         return this;

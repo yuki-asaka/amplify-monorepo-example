@@ -66,7 +66,13 @@ export class SiteCdn extends Construct {
             runtime: lambda.Runtime.NODEJS_20_X,
             entry: './lib/server/site-cdn/auth-handler.ts',
             bundling: {
-                externalModules: ['@aws-sdk/*'],
+                externalModules: [
+                    '@aws-sdk/*',
+                    'hono',
+                    'hono/secure-headers',
+                    'hono/logger',
+                    'hono/lambda-edge',
+                ],
             },
         });
         this._lambdaAtEdge.applyRemovalPolicy(RemovalPolicy.DESTROY);
@@ -125,7 +131,13 @@ export class SiteCdn extends Construct {
             runtime: lambda.Runtime.NODEJS_20_X,
             entry: './lib/server/site-cdn/oauth-access-token.ts',
             bundling: {
-                externalModules: ['@aws-sdk/*'],
+                externalModules: [
+                    '@aws-sdk/*',
+                    'hono',
+                    'hono/secure-headers',
+                    'hono/logger',
+                    'hono/lambda-edge',
+                ],
             },
         });
         accessTokenLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
@@ -138,7 +150,13 @@ export class SiteCdn extends Construct {
             runtime: lambda.Runtime.NODEJS_20_X,
             entry: './lib/server/site-cdn/oauth-user.ts',
             bundling: {
-                externalModules: ['@aws-sdk/*'],
+                externalModules: [
+                    '@aws-sdk/*',
+                    'hono',
+                    'hono/secure-headers',
+                    'hono/logger',
+                    'hono/lambda-edge',
+                ],
             },
         });
         userLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);

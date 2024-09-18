@@ -12,7 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-amplify": "^6.6.0"
+    "aws-amplify": "^6.6.0",
+    "cognito-at-edge": "^1.5.3"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.2.1",

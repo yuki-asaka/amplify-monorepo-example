@@ -24,8 +24,9 @@ new ssm.StringParameter(stack, 'user-pool-id', {
   parameterName: `/${appName}/user-pool-id`, stringValue: userPool.userPoolId,
 });
 
+const domain = userPool.node.findChild('UserPoolDomain') as cognito.UserPoolDomain;
 new ssm.StringParameter(stack, 'user-pool-domain-prefix', {
-  parameterName: `/${appName}/user-pool-domain`, stringValue: userPool.userPoolProviderUrl,
+  parameterName: `/${appName}/user-pool-domain`, stringValue: domain.domainName,
 });
 
 const cognitoClientParamName = `/${appName}/user-pool-client-id`;

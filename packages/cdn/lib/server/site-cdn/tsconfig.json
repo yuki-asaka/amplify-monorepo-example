@@ -9,6 +9,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "moduleResolution": "node",
+    "baseUrl": "./",
     "paths": {
       "hono/*": ["node_modules/hono/*"]
     }

@@ -42,7 +42,7 @@ export const handler = async (event: CloudFrontRequestEvent): Promise<CloudFront
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
             "Accept": "application/json",
         },
-        body,
+        body: Buffer.from(body, 'base64').toString('utf-8'),
     });
 
     const responseBody = await response.json();

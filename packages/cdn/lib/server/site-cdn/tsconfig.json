@@ -10,7 +10,7 @@
     "rootDir": "./src",
     "moduleResolution": "node",
     "paths": {
-      "hono/*": ["../node_modules/hono/*"]
+      "hono/*": ["node_modules/hono/*"]
     }
   },
   "include": ["src/**/*.ts"],

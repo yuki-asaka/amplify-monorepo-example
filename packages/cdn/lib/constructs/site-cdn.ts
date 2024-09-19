@@ -7,8 +7,10 @@ import {
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_certificatemanager as acm,
+    aws_iam as iam,
     aws_route53 as route53,
     aws_route53_targets as targets,
+    aws_ssm as ssm,
     aws_wafv2 as wafv2,
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
@@ -62,10 +64,11 @@ export class SiteCdn extends Construct {
         });
     }
 
-    withLambdaProtection(): SiteCdn {
+    withLambdaProtection(parameterRegion?: string): SiteCdn {
         const jsonIndentSpaces = 4;
         fs.writeFileSync('./lib/server/site-cdn/auth-handler.config.json', JSON.stringify({
             AppName: this._appName,
+            Region: parameterRegion ?? 'us-east-1',
         }, null, jsonIndentSpaces));
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
@@ -83,7 +86,18 @@ export class SiteCdn extends Construct {
         });
         this._lambdaAtEdge.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
-        return this;
+        const stack = Stack.of(this);
+        const arnSuffix = `arn:aws:ssm:${parameterRegion}:${stack.account}:parameter/${this._appName}`;
+        const statement = new iam.PolicyStatement({
+            actions: ['ssm:GetParameter'],
+            resources: [
+                `${arnSuffix}/user-pool-id`,
+                `${arnSuffix}/user-pool-client-id`,
+                `${arnSuffix}/user-pool-domain`,
+            ]
+        });
+        this._lambdaAtEdge.addToRolePolicy(statement);
+                return this;
     }
 
     withCDN(): SiteCdn {

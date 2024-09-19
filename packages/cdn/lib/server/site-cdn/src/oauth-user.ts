@@ -47,12 +47,16 @@ export const handler = async (event: CloudFrontRequestEvent): Promise<CloudFront
     const obj = await response.json();
     log('DEBUG', `User info received: ${JSON.stringify(obj)}`);
 
+    const email = obj.email ? obj.email : `${obj.login}@users.noreply.github.com`;
+    log('DEBUG', `Email: ${email}`);
+
     return {
         status: response.status.toString(),
         statusDescription: response.statusText,
         body: JSON.stringify({
             ...obj,
             sub: obj.id.toString(),
+            email,
         }),
         headers: {
             'content-type': [{

@@ -14,6 +14,7 @@ import {
     aws_wafv2 as wafv2,
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
+import * as path from "node:path";
 
 
 enum HttpStatus {
@@ -157,7 +158,8 @@ export class SiteCdn extends Construct {
 
         const accessTokenLambda = new lambdaNode.NodejsFunction(this, 'OauthAccessToken', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './lib/server/site-cdn/oauth-access-token.ts',
+            entry: path.join(__dirname, '../server/site-cdn/oauth-access-token.ts'),
+            handler: 'handler',
             bundling: {
                 externalModules: [
                     '@aws-sdk/*',
@@ -172,7 +174,8 @@ export class SiteCdn extends Construct {
 
         const userLambda = new lambdaNode.NodejsFunction(this, 'OauthUser', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './lib/server/site-cdn/oauth-user.ts',
+            entry: path.join(__dirname, '../server/site-cdn/oauth-user.ts'),
+            handler: 'handler',
             bundling: {
                 externalModules: [
                     '@aws-sdk/*',

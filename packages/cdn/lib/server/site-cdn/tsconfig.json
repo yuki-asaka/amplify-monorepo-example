@@ -7,11 +7,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "paths": {
+      "hono/*": ["../node_modules/hono/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"],
-  "paths": {
-    "hono/*": ["../node_modules/hono/*"]
-  }
 }

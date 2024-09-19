@@ -1,16 +1,25 @@
-import {Hono} from "hono";
-import {secureHeaders} from "hono/secure-headers";
-import {logger} from "hono/logger";
-import {handle} from "hono/lambda-edge";
-import {json} from "node:stream/consumers";
+import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
 
-const app = new Hono();
+export const handler = async (event: CloudFrontRequestEvent): Promise<CloudFrontRequestResult> => {
+    const request = event.Records[0].cf.request;
+    const headers = request.headers;
 
-app.use("*", logger(), secureHeaders());
-app.use("/oauth/access_token");
+    if (request.method !== 'POST') {
+        return {
+            status: '405',
+            statusDescription: 'Method Not Allowed',
+            body: 'Method Not Allowed'
+        };
+    }
 
-app.post("/oauth/access_token", async (c) => {
-    const body = await c.req.blob()
+    const body = request.body?.data;
+    if (!body) {
+        return {
+            status: '400',
+            statusDescription: 'Bad Request',
+            body: 'Bad Request'
+        };
+    }
 
     const tokenUrl = "https://github.com/login/oauth/access_token";
     const response = await fetch(tokenUrl, {
@@ -20,21 +29,22 @@ app.post("/oauth/access_token", async (c) => {
             "Accept": "application/json",
         },
         body,
-        redirect: "manual"
     });
 
-    // logging response header
-    console.log(response.headers);
+    const responseBody = await response.json();
 
-    // const res = await response.json();
-
-    // logging response body
-    // console.log(res);
-
-    return c.json({
-        body: await response.json(),
-        status: response.status,
-    })
-});
-
-export const handler = handle(app);
+    return {
+        status: response.status.toString(),
+        statusDescription: response.statusText,
+        body: JSON.stringify({
+            body: responseBody,
+            status: response.status,
+        }),
+        headers: {
+            'content-type': [{
+                key: 'Content-Type',
+                value: 'application/json'
+            }]
+        }
+    };
+};

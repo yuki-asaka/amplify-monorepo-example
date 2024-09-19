@@ -161,10 +161,6 @@ export class SiteCdn extends Construct {
             bundling: {
                 externalModules: [
                     '@aws-sdk/*',
-                    'hono',
-                    'hono/secure-headers',
-                    'hono/logger',
-                    'hono/lambda-edge',
                 ],
             },
         });
@@ -180,10 +176,6 @@ export class SiteCdn extends Construct {
             bundling: {
                 externalModules: [
                     '@aws-sdk/*',
-                    'hono',
-                    'hono/secure-headers',
-                    'hono/logger',
-                    'hono/lambda-edge',
                 ],
             },
         });

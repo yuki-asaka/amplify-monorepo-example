@@ -3,7 +3,7 @@ import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import config from './auth-handler.config.json';
 import { AsyncHandler } from './helpers/async-handler';
 
-const defaultRegion = 'us-east-1';
+const defaultRegion = config.Region;
 const ssmParamNames = {
     userPoolIdParamName: `/${config.AppName}/user-pool-id`,
     userPoolClientIdParamName: `/${config.AppName}/user-pool-client-id`,

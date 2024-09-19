@@ -17,6 +17,6 @@ new constructs.SiteCdn(infraStack, 'SiteCdn', {
     appName: 'site-cdn'
 })
 .withCustomDomain(hostedZoneId!, hostedZoneName!, domainName!)
-.withLambdaProtection()
+.withLambdaProtection('ap-northeast-1')
 .withCDN()
 .withGithubWrapper()

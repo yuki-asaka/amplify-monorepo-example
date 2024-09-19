@@ -1,41 +1,50 @@
-import {Hono} from "hono";
-import {secureHeaders} from "hono/secure-headers";
-import {logger} from "hono/logger";
-import {handle} from "hono/lambda-edge";
+import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
 
-const app = new Hono();
+export const handler = async (event: CloudFrontRequestEvent): Promise<CloudFrontRequestResult> => {
+    const request = event.Records[0].cf.request;
+    const headers = request.headers;
 
-app.use("*", logger(), secureHeaders());
-app.use("/oauth/user");
-
-app.get("/oauth/user", async (c) => {
-    const authHeader = c.req.header("Authorization");
+    const authHeader = headers['Authorization'] ? headers['Authorization'][0].value : null;
     if (!authHeader) {
-        return new Response("Unauthorized", { status: 401 });
+        return {
+            status: '401',
+            statusDescription: 'Unauthorized',
+            body: 'Unauthorized'
+        };
     }
-    const token = authHeader.replace("Bearer ", "");
+
+    const token = authHeader.replace('Bearer ', '');
     if (!token) {
-        return new Response("Unauthorized", { status: 401 });
+        return {
+            status: '401',
+            statusDescription: 'Unauthorized',
+            body: 'Unauthorized'
+        };
     }
-    const userUrl = "https://api.github.com/user";
+
+    const userUrl = 'https://api.github.com/user';
     const response = await fetch(userUrl, {
         headers: {
-            "Authorization": `token ${token}`,
-            "Accept": "application/json",
+            'Authorization': `token ${token}`,
+            'Accept': 'application/json',
         },
-        redirect: "manual"
     });
+
     const obj = await response.json();
-    // dump the user object to the console
     console.log(obj);
 
-    return c.json({
-        body: {
+    return {
+        status: response.status.toString(),
+        statusDescription: response.statusText,
+        body: JSON.stringify({
             ...obj,
             sub: obj.id.toString(),
-        },
-        status: response.status
-    });
-});
-
-export const handler = handle(app);
+        }),
+        headers: {
+            'content-type': [{
+                key: 'Content-Type',
+                value: 'application/json'
+            }]
+        }
+    };
+};

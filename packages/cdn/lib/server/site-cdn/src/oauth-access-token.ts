@@ -51,10 +51,7 @@ export const handler = async (event: CloudFrontRequestEvent): Promise<CloudFront
     return {
         status: response.status.toString(),
         statusDescription: response.statusText,
-        body: JSON.stringify({
-            body: responseBody,
-            status: response.status,
-        }),
+        body: JSON.stringify(responseBody),
         headers: {
             'content-type': [{
                 key: 'Content-Type',

@@ -11,7 +11,8 @@
     "paths": {
       "$amplify/*": [
         "../.amplify/generated/*"
-      ]
+      ],
+      "hono/*": ["node_modules/hono/*"]
     }
   }
 }

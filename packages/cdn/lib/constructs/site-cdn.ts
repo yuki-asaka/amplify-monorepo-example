@@ -10,16 +10,9 @@ import {
     aws_iam as iam,
     aws_route53 as route53,
     aws_route53_targets as targets,
-    aws_ssm as ssm,
     aws_wafv2 as wafv2,
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
-import * as path from "node:path";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 
 enum HttpStatus {
@@ -163,7 +156,7 @@ export class SiteCdn extends Construct {
 
         const accessTokenLambda = new lambdaNode.NodejsFunction(this, 'OauthAccessToken', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: path.join(__dirname, '../server/site-cdn/src/oauth-access-token.ts'),
+            entry: './lib/server/site-cdn/src/oauth-access-token.ts',
             handler: 'handler',
             bundling: {
                 externalModules: [
@@ -179,7 +172,7 @@ export class SiteCdn extends Construct {
 
         const userLambda = new lambdaNode.NodejsFunction(this, 'OauthUser', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: path.join(__dirname, '../server/site-cdn/src/oauth-user.ts'),
+            entry: './lib/server/site-cdn/src/oauth-user.ts',
             handler: 'handler',
             bundling: {
                 externalModules: [

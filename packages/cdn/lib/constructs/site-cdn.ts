@@ -15,6 +15,11 @@ import {
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 
 enum HttpStatus {

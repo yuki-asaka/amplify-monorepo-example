@@ -65,14 +65,14 @@ export class SiteCdn extends Construct {
 
     withLambdaProtection(parameterRegion?: string): SiteCdn {
         const jsonIndentSpaces = 4;
-        fs.writeFileSync('./server/site-cdn/src/auth-handler.config.json', JSON.stringify({
+        fs.writeFileSync('lib/server/site-cdn/src/auth-handler.config.json', JSON.stringify({
             AppName: this._appName,
             Region: parameterRegion ?? 'us-east-1',
         }, null, jsonIndentSpaces));
 
         this._lambdaAtEdge = new lambdaNode.NodejsFunction(this, 'AuthHandler', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './server/site-cdn/src/auth-handler.ts',
+            entry: 'lib/server/site-cdn/src/auth-handler.ts',
             bundling: {
                 externalModules: [
                     '@aws-sdk/*',
@@ -150,13 +150,13 @@ export class SiteCdn extends Construct {
     withGithubWrapper(
     ): SiteCdn {
         const jsonIndentSpaces = 4;
-        fs.writeFileSync('./server/site-cdn/src/oauth-access-token.config.json', JSON.stringify({
+        fs.writeFileSync('lib/server/site-cdn/src/oauth-access-token.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         const accessTokenLambda = new lambdaNode.NodejsFunction(this, 'OauthAccessToken', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './server/site-cdn/src/oauth-access-token.ts',
+            entry: 'lib/server/site-cdn/src/oauth-access-token.ts',
             handler: 'handler',
             bundling: {
                 externalModules: [
@@ -166,13 +166,13 @@ export class SiteCdn extends Construct {
         });
         accessTokenLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
-        fs.writeFileSync('./server/site-cdn/src/oauth-user.config.json', JSON.stringify({
+        fs.writeFileSync('lib/server/site-cdn/src/oauth-user.config.json', JSON.stringify({
             AppName: this._appName,
         }, null, jsonIndentSpaces));
 
         const userLambda = new lambdaNode.NodejsFunction(this, 'OauthUser', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            entry: './server/site-cdn/src/oauth-user.ts',
+            entry: 'lib/server/site-cdn/src/oauth-user.ts',
             handler: 'handler',
             bundling: {
                 externalModules: [

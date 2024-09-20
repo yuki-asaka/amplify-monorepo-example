@@ -10,26 +10,3 @@ const backend = defineBackend({
   auth,
   data,
 });
-
-if (process.env.APP_NAME === undefined) {
-  throw new Error('APP_NAME is not defined');
-}
-
-const appName = process.env.APP_NAME;
-const userPool = backend.auth.resources.userPool as cognito.UserPool;
-const userPoolClient = backend.auth.resources.userPoolClient as cognito.UserPoolClient;
-
-const stack = backend.createStack('SiteParameters');
-new ssm.StringParameter(stack, 'user-pool-id', {
-  parameterName: `/${appName}/user-pool-id`, stringValue: userPool.userPoolId,
-});
-
-const domain = userPool.node.findChild('UserPoolDomain') as cognito.UserPoolDomain;
-new ssm.StringParameter(stack, 'user-pool-domain-prefix', {
-  parameterName: `/${appName}/user-pool-domain`, stringValue: domain.domainName,
-});
-
-const cognitoClientParamName = `/${appName}/user-pool-client-id`;
-new ssm.StringParameter(stack, 'user-pool-client-id', {
-  parameterName: cognitoClientParamName, stringValue: userPoolClient.userPoolClientId,
-});

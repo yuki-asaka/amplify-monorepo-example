@@ -1,5 +1,5 @@
 import {Construct} from "constructs";
-import {aws_cognito as cognito, aws_lambda as lambda, aws_ssm as ssm} from "aws-cdk-lib";
+import {aws_cognito as cognito, custom_resources as customResources, aws_ssm as ssm} from "aws-cdk-lib";
 import * as constructs from ".";
 
 export class SiteAdapter extends Construct {
@@ -51,7 +51,7 @@ export class SiteAdapter extends Construct {
       version: 1,
     });
 
-    new constructs.BasicLambda(this, 'PreAuthTrigger', {
+    const basicLambda = new constructs.BasicLambda(this, 'PreAuthTrigger', {
       appName: this._appName,
       functionName: 'pre-auth-trigger',
     })
@@ -69,6 +69,33 @@ export class SiteAdapter extends Construct {
     //   cognito.UserPoolOperation.PRE_AUTHENTICATION,
     //   preSignUpTrigger.lambda
     // )
+
+    const upsertSdkCall = {
+      service: 'CognitoIdentityServiceProvider',
+      action: 'updateUserPool',
+      parameters: {
+        UserPoolId: this._userPool.userPoolId,
+        LambdaConfig: {
+          PreAuthentication: basicLambda.lambda.functionArn,
+        }
+      },
+      physicalResourceId: customResources.PhysicalResourceId.of('PreAuthTriggerUserPool'),
+    }
+    new customResources.AwsCustomResource(this, 'PreAuthTriggerUserPool', {
+      onCreate: upsertSdkCall,
+      onUpdate: upsertSdkCall,
+      onDelete: {
+        service: 'CognitoIdentityServiceProvider',
+        action: 'updateUserPool',
+        parameters: {
+          UserPoolId: this._userPool.userPoolId,
+          LambdaConfig: {
+            PreAuthentication: '',
+          }
+        },
+      },
+    });
+
     return this;
   }
 }

@@ -3,10 +3,22 @@ import { auth } from './auth/resource';
 import { data } from './data/resource';
 import {
   aws_cognito as cognito,
-  aws_ssm as ssm,
 } from 'aws-cdk-lib';
+import * as constructs from '../lib/constructs';
 
 const backend = defineBackend({
   auth,
   data,
 });
+
+const authStack = backend.createStack('AuthStack');
+
+const appName = process.env.APP_NAME as string;
+const userPool = backend.auth.resources.userPool as cognito.UserPool;
+const userPoolClient = backend.auth.resources.userPoolClient as cognito.UserPoolClient;
+
+new constructs.SiteAdapter(authStack, 'SiteAdapter', {
+  appName,
+  userPool,
+  userPoolClient,
+})

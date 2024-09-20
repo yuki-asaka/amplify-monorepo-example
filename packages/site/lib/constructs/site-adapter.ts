@@ -51,7 +51,7 @@ export class SiteAdapter extends Construct {
       version: 1,
     });
 
-    const preSignUpTrigger = new constructs.BasicLambda(this, 'PreAuthTrigger', {
+    new constructs.BasicLambda(this, 'PreAuthTrigger', {
       appName: this._appName,
       functionName: 'pre-auth-trigger',
     })
@@ -65,10 +65,10 @@ export class SiteAdapter extends Construct {
 
     // https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#lambda-triggers-for-federated-users
     // federated identity has a dedicated trigger
-    this._userPool.addTrigger(
-      cognito.UserPoolOperation.PRE_AUTHENTICATION,
-      preSignUpTrigger.lambda
-    )
+    // this._userPool.addTrigger(
+    //   cognito.UserPoolOperation.PRE_AUTHENTICATION,
+    //   preSignUpTrigger.lambda
+    // )
     return this;
   }
 }

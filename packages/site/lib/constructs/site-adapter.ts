@@ -1,5 +1,10 @@
 import {Construct} from "constructs";
-import {aws_cognito as cognito, custom_resources as customResources, aws_ssm as ssm} from "aws-cdk-lib";
+import {
+  aws_cognito as cognito,
+  aws_ssm as ssm,
+  aws_iam as iam,
+  custom_resources as customResources,
+} from "aws-cdk-lib";
 import * as constructs from ".";
 
 export class SiteAdapter extends Construct {
@@ -70,6 +75,15 @@ export class SiteAdapter extends Construct {
     //   preSignUpTrigger.lambda
     // )
 
+    const role = new iam.Role(this, 'CustomResourceRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    });
+
+    role.addToPolicy(new iam.PolicyStatement({
+      actions: ['cognito-idp:UpdateUserPool'],
+      resources: [this._userPool.userPoolArn],
+    }));
+
     const upsertSdkCall = {
       service: 'CognitoIdentityServiceProvider',
       action: 'updateUserPool',
@@ -81,6 +95,7 @@ export class SiteAdapter extends Construct {
       },
       physicalResourceId: customResources.PhysicalResourceId.of('PreAuthTriggerUserPool'),
     }
+
     new customResources.AwsCustomResource(this, 'PreAuthTriggerUserPool', {
       onCreate: upsertSdkCall,
       onUpdate: upsertSdkCall,
@@ -94,6 +109,13 @@ export class SiteAdapter extends Construct {
           }
         },
       },
+      policy: customResources.AwsCustomResourcePolicy.fromStatements([
+        new iam.PolicyStatement({
+          actions: ['cognito-idp:UpdateUserPool'],
+          resources: [this._userPool.userPoolArn],
+        }),
+      ]),
+      role
     });
 
     return this;

@@ -1,5 +1,5 @@
 import {Construct} from "constructs";
-import {aws_cognito as cognito, aws_ssm as ssm} from "aws-cdk-lib";
+import {aws_cognito as cognito, aws_lambda as lambda, aws_ssm as ssm} from "aws-cdk-lib";
 import * as constructs from ".";
 
 export class SiteAdapter extends Construct {
@@ -51,7 +51,7 @@ export class SiteAdapter extends Construct {
       version: 1,
     });
 
-    const preSignUpTrigger = new constructs.BasicLambda(this, 'PreAuthTrigger', {
+    new constructs.BasicLambda(this, 'PreAuthTrigger', {
       appName: this._appName,
       functionName: 'pre-auth-trigger',
     })
@@ -65,10 +65,15 @@ export class SiteAdapter extends Construct {
 
     // https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#lambda-triggers-for-federated-users
     // federated identity has a dedicated trigger
+    // Retrieve Lambda ARN from SSM Parameter Store
+    const preAuthTriggerArn = ssm.StringParameter.valueForStringParameter(this, `/${this._appName}/pre-auth-trigger/arn`);
+
+    // Use the retrieved ARN to add the trigger
     this._userPool.addTrigger(
       cognito.UserPoolOperation.PRE_AUTHENTICATION,
-      preSignUpTrigger.lambda
-    )
+      lambda.Function.fromFunctionArn(this, 'PreAuthTriggerFunction', preAuthTriggerArn)
+    );
+
     return this;
   }
 }

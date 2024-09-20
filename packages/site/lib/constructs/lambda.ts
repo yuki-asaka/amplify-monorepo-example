@@ -40,6 +40,12 @@ export class BasicLambda extends Construct {
       timeout: Duration.seconds(props.timeout ?? 3),
     });
 
+    // Save Lambda ARN to SSM Parameter Store
+    new ssm.StringParameter(this, 'LambdaArnParameter', {
+      parameterName: `/${props.appName}/${props.functionName}/arn`,
+      stringValue: this._lambda.functionArn,
+    });
+
     return this;
   }
 

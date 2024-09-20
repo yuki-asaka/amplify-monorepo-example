@@ -1,4 +1,3 @@
-import path from "path";
 import {Construct} from "constructs";
 import {
   aws_iam as iam,
@@ -32,7 +31,7 @@ export class BasicLambda extends Construct {
       role,
       functionName: `${props.appName}-${props.functionName}`,
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: `lib/server/src/${props.functionName}.ts`,
+      entry: `server/src/${props.functionName}.ts`,
       bundling: {
         // minify: true,
         externalModules: ['@aws-sdk/*'],

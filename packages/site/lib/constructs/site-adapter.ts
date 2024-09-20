@@ -2,10 +2,7 @@ import {Construct} from "constructs";
 import {
   aws_cognito as cognito,
   aws_ssm as ssm,
-  aws_iam as iam,
-  custom_resources as customResources,
 } from "aws-cdk-lib";
-import * as constructs from ".";
 
 export class SiteAdapter extends Construct {
   private readonly _appName: string;
@@ -43,81 +40,5 @@ export class SiteAdapter extends Construct {
     new ssm.StringParameter(this, 'user-pool-client-id', {
       parameterName: cognitoClientParamName, stringValue: this._userPoolClient.userPoolClientId,
     });
-  }
-
-  withGithubAuthRestriction(
-    appId: string,
-    installId: string,
-    orgName: string
-  ) {
-    const ssmName = `/${this._appName}/github-app/cert`;
-    const ssmCert = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'PreAuthTriggerSecret', {
-      parameterName: ssmName,
-      version: 1,
-    });
-
-    const basicLambda = new constructs.BasicLambda(this, 'PreAuthTrigger', {
-      appName: this._appName,
-      functionName: 'pre-auth-trigger',
-    })
-      .withSSMParameter(ssmCert)
-      .withEnvironment([
-        { 'APP_ID': appId },
-        { 'INSTALL_ID': installId },
-        { 'ORG_NAME': orgName },
-        { 'SSM_PARAMETER_NAME': ssmName },
-      ])
-
-    // https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#lambda-triggers-for-federated-users
-    // federated identity has a dedicated trigger
-    // this._userPool.addTrigger(
-    //   cognito.UserPoolOperation.PRE_AUTHENTICATION,
-    //   preSignUpTrigger.lambda
-    // )
-
-    const role = new iam.Role(this, 'CustomResourceRole', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-    });
-
-    role.addToPolicy(new iam.PolicyStatement({
-      actions: ['cognito-idp:UpdateUserPool'],
-      resources: [this._userPool.userPoolArn],
-    }));
-
-    const upsertSdkCall = {
-      service: 'CognitoIdentityServiceProvider',
-      action: 'updateUserPool',
-      parameters: {
-        UserPoolId: this._userPool.userPoolId,
-        LambdaConfig: {
-          PreAuthentication: basicLambda.lambda.functionArn,
-        }
-      },
-      physicalResourceId: customResources.PhysicalResourceId.of('PreAuthTriggerUserPool'),
-    }
-
-    new customResources.AwsCustomResource(this, 'PreAuthTriggerUserPool', {
-      onCreate: upsertSdkCall,
-      onUpdate: upsertSdkCall,
-      onDelete: {
-        service: 'CognitoIdentityServiceProvider',
-        action: 'updateUserPool',
-        parameters: {
-          UserPoolId: this._userPool.userPoolId,
-          LambdaConfig: {
-            PreAuthentication: '',
-          }
-        },
-      },
-      policy: customResources.AwsCustomResourcePolicy.fromStatements([
-        new iam.PolicyStatement({
-          actions: ['cognito-idp:UpdateUserPool'],
-          resources: [this._userPool.userPoolArn],
-        }),
-      ]),
-      role
-    });
-
-    return this;
   }
 }

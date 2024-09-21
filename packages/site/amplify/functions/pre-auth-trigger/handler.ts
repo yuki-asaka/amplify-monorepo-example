@@ -12,7 +12,7 @@ const hasOrganizationMembership = async (organization: string, userId: string, t
     const members = response.data;
     let user;
     for (const key in members) {
-      if (members[key].hasOwn('id')) {
+      if (Object.prototype.hasOwnProperty.call(members[key], 'id')) {
         if (String(members[key].id) === String(userId)) {
           user = members[key];
           break;

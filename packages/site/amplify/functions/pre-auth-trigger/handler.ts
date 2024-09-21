@@ -19,8 +19,11 @@ const hasOrganizationMembership = async (organization: string, userId: string, t
         }
       }
     }
+    console.debug('user', user);
+    console.debug('members', members);
     return !!user;
   } catch (error: any) {
+    console.debug('error.response', error.response);
     if (error.response.status === 404) {
       return false;
     }

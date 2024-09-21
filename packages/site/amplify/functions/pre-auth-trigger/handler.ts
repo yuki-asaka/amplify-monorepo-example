@@ -12,7 +12,7 @@ const hasOrganizationMembership = async (organization: string, userId: string, t
     const members = response.data;
     let user;
     for (const key in members) {
-      if (members[key].hasOwn('id')) {
+      if (Object.prototype.hasOwnProperty.call(members[key], 'id')) {
         if (String(members[key].id) === String(userId)) {
           user = members[key];
           break;
@@ -57,10 +57,8 @@ export const handler: Handler = async (event: PreAuthenticationTriggerEvent) => 
   console.info('PreAuthenticationTriggerEvent received:', JSON.stringify(event));
 
   const token = await getToken(env.APP_ID, env.APP_SECRET);
-  console.debug('get token correctly');
 
   const credentials = await getCredentials(env.INSTALL_ID, token);
-  console.debug('get credentials correctly');
 
   if (!event.request.userAttributes.identities) {
     throw new Error('User attributes identities is not exist');

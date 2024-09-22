@@ -1,6 +1,11 @@
 import {defineAuth, secret} from '@aws-amplify/backend';
 import {preAuthTrigger} from "../functions/pre-auth-trigger/resource";
 
+const callbacks = [
+  'http://localhost:3000',
+  `https://${process.env.DOMAIN_NAME}.${process.env.HOSTED_ZONE_NAME}`
+];
+
 export const auth = defineAuth({
   loginWith: {
     email: true,
@@ -18,8 +23,8 @@ export const auth = defineAuth({
           jwksUri: process.env.OIDC_JWKS_URI!,
         }
       }],
-      callbackUrls: ['http://localhost:3000'],
-      logoutUrls: ['http://localhost:3000']
+      callbackUrls: callbacks,
+      logoutUrls: callbacks
     }
   },
   triggers: {

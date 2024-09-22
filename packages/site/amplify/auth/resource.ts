@@ -3,8 +3,10 @@ import {preAuthTrigger} from "../functions/pre-auth-trigger/resource";
 
 const callbacks = [
   'http://localhost:3000',
-  `https://${process.env.DOMAIN_NAME}.${process.env.HOSTED_ZONE_NAME}`
 ];
+if (process.env.HOSTED_ZONE_NAME && process.env.DOMAIN_NAME) {
+  callbacks.push(`https://${process.env.DOMAIN_NAME}.${process.env.HOSTED_ZONE_NAME}`);
+}
 
 export const auth = defineAuth({
   loginWith: {

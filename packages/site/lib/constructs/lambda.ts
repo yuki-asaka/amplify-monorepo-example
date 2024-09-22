@@ -1,4 +1,3 @@
-import path from "path";
 import {Construct} from "constructs";
 import {
   aws_iam as iam,
@@ -32,13 +31,19 @@ export class BasicLambda extends Construct {
       role,
       functionName: `${props.appName}-${props.functionName}`,
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: `lib/server/src/${props.functionName}.ts`,
+      entry: `server/src/${props.functionName}.ts`,
       bundling: {
         // minify: true,
         externalModules: ['@aws-sdk/*'],
       },
       logRetention: logs.RetentionDays.ONE_WEEK,
       timeout: Duration.seconds(props.timeout ?? 3),
+    });
+
+    // Save Lambda ARN to SSM Parameter Store
+    new ssm.StringParameter(this, 'LambdaArnParameter', {
+      parameterName: `/${props.appName}/${props.functionName}/arn`,
+      stringValue: this._lambda.functionArn,
     });
 
     return this;

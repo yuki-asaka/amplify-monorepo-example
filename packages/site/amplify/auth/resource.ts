@@ -1,4 +1,5 @@
 import {defineAuth, secret} from '@aws-amplify/backend';
+import {preAuthTrigger} from "../functions/pre-auth-trigger/resource";
 
 export const auth = defineAuth({
   loginWith: {
@@ -20,5 +21,9 @@ export const auth = defineAuth({
       callbackUrls: ['http://localhost:3000'],
       logoutUrls: ['http://localhost:3000']
     }
+  },
+  triggers: {
+    preSignUp: preAuthTrigger,
+    preAuthentication: preAuthTrigger
   }
 });

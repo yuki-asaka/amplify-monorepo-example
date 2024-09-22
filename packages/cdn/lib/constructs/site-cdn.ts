@@ -134,6 +134,7 @@ export class SiteCdn extends Construct {
             logBucket: this._accessLogBucket,
             logFilePrefix: 'frontend-distribution/',
             certificate: this._certificate,
+            domainNames: this._domainName ? [`${this._domainName}.${this._hostedZone?.zoneName}`] : undefined,
         });
 
         if (this._domainName && this._hostedZone) {
@@ -233,6 +234,7 @@ export class SiteCdn extends Construct {
             hostedZone: this._hostedZone,
             region: 'us-east-1',
         });
+
         return this;
     }
 }

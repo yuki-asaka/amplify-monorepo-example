@@ -30,19 +30,22 @@ export class S3DeployPipeline extends Construct {
         this._artifactBucket = props.artifactBucket;
         this._repo = props.repo;
 
+        const sourceArtifact = new pipeline.Artifact('SourceArtifact');
+        const buildArtifact = new pipeline.Artifact('BuildArtifact');
+
         const p = new pipeline.Pipeline(this, 'Pipeline', {
             pipelineName: `${this._appName}-pipeline`,
             stages: [
-                this._sourceStage(props.codeConnectionsArn),
-                this._buildStage(props.sourcePath || ''),
-                this._deployStage(),
+                this._sourceStage(props.codeConnectionsArn, sourceArtifact),
+                this._buildStage(props.sourcePath || '', sourceArtifact, buildArtifact),
+                this._deployStage(buildArtifact),
             ]
         });
 
         this._artifactBucket.grantReadWrite(p.role);
     }
 
-    private _sourceStage(codeConnectionsArn: string): pipeline.StageProps {
+    private _sourceStage(codeConnectionsArn: string, artifact: pipeline.Artifact): pipeline.StageProps {
         return {
             stageName: 'Source',
             actions: [
@@ -52,14 +55,14 @@ export class S3DeployPipeline extends Construct {
                     repo: this._repo.name,
                     branch: this._repo.branch,
                     connectionArn: codeConnectionsArn,
-                    output: new pipeline.Artifact(),
+                    output: artifact,
                     variablesNamespace: 'SourceVariables',
                 }),
             ],
         };
     }
 
-    private _buildStage(sourcePath: string): pipeline.StageProps {
+    private _buildStage(sourcePath: string, sourceArtifact: pipeline.Artifact, buildArtifact: pipeline.Artifact): pipeline.StageProps {
         const role = new iam.Role(this, 'CodeBuildRole', {
             roleName: `${this._appName}-codebuild-role`,
             assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com'),
@@ -78,13 +81,20 @@ export class S3DeployPipeline extends Construct {
             actions: [
                 new pipelineActions.CodeBuildAction({
                     actionName: 'CodeBuild',
-                    input: new pipeline.Artifact(),
+                    input: sourceArtifact,
+                    outputs: [buildArtifact],
                     project: new codebuild.Project(this, 'CodeBuildProject', {
                         projectName: `${this._appName}-build`,
                         role,
                         environment: {
                             buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
                             privileged: true,
+                        },
+                        environmentVariables: {
+                          Commit_ID: {
+                              type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+                              value: '#{SourceVariables.CommitId}'
+                          },
                         },
                         buildSpec:　codebuild.BuildSpec.fromObject({
                             version: '0.2',
@@ -115,13 +125,13 @@ export class S3DeployPipeline extends Construct {
         }
     }
 
-    private _deployStage(): pipeline.StageProps {
+    private _deployStage(buildArtifact: pipeline.Artifact): pipeline.StageProps {
         return {
             stageName: 'Deploy',
             actions: [
                 new pipelineActions.S3DeployAction({
                     actionName: 'S3Deploy',
-                    input: new pipeline.Artifact(),
+                    input: buildArtifact,
                     bucket: this._artifactBucket,
                 }),
             ],

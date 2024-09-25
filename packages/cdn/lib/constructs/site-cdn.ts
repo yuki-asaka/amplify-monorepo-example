@@ -13,6 +13,7 @@ import {
     aws_wafv2 as wafv2,
 } from 'aws-cdk-lib';
 import * as fs from "node:fs";
+import * as constructs from './index';
 
 
 enum HttpStatus {
@@ -23,6 +24,7 @@ export class SiteCdn extends Construct {
     private readonly _appName: string;
     private readonly _accessLogBucket: s3.IBucket;
     private readonly _frontendS3Bucket: s3.IBucket;
+    private readonly _webS3Bucket: s3.IBucket;
     private _lambdaAtEdge: lambdaNode.NodejsFunction | undefined;
     private _distribution: cloudfront.Distribution | undefined;
     private _wafACL: wafv2.CfnWebACL | undefined;
@@ -59,6 +61,18 @@ export class SiteCdn extends Construct {
             autoDeleteObjects: true,
             serverAccessLogsBucket: this._accessLogBucket,
             serverAccessLogsPrefix: 'frontend-bucket/',
+            removalPolicy: RemovalPolicy.DESTROY,
+        });
+
+        this._webS3Bucket = new s3.Bucket(this, 'WebBucket', {
+            accessControl: s3.BucketAccessControl.PRIVATE,
+            bucketName: `${this._appName}-${stack.region}-${stack.account}-web`,
+            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+            encryption: s3.BucketEncryption.S3_MANAGED,
+            enforceSSL: true,
+            autoDeleteObjects: true,
+            serverAccessLogsBucket: this._accessLogBucket,
+            serverAccessLogsPrefix: 'web-bucket/',
             removalPolicy: RemovalPolicy.DESTROY,
         });
     }
@@ -113,6 +127,16 @@ export class SiteCdn extends Construct {
                     eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
                     functionVersion: this._lambdaAtEdge!.currentVersion
                 }]
+            },
+            additionalBehaviors: {
+                '/c/*': {
+                    origin: origins.S3BucketOrigin.withOriginAccessIdentity(this._webS3Bucket),
+                    allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+                    viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
+                    compress: true,
+                    cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+                }
             },
             httpVersion: cloudfront.HttpVersion.HTTP1_1,
             enableIpv6: false,
@@ -236,5 +260,21 @@ export class SiteCdn extends Construct {
         });
 
         return this;
+    }
+
+    connectWebPipeline(codeConnectionsArn: string, repo: {
+            branch: string,
+            name: string,
+            owner: string,
+        },
+       sourcePath? : string
+    ) {
+        new constructs.S3DeployPipeline(this, 'WebPipeline', {
+            appName: this._appName,
+            artifactBucket: this._webS3Bucket,
+            codeConnectionsArn,
+            repo,
+            sourcePath
+        })
     }
 }
